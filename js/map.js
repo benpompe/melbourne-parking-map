@@ -1,6 +1,3 @@
-console.log("START OF MAP.JS");
-alert("MAP.JS RUNNING");
-
 const map = L.map('map').setView([-37.8136, 144.9631], 14);
 
 L.tileLayer(
