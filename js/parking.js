@@ -70,35 +70,6 @@ fetch("data/parking-zones-map-data-simple.csv")
         return "marker-default";
     }
 
-    
-    const markerClass =
-        getMarkerClass(row.restriction_code);
-    
-    const icon = L.divIcon({
-        className: "parking-marker",
-        html: `
-            <div class="parking-pill ${markerClass}">
-                ${row.duration}
-            </div>
-        `,
-        iconSize: [48, 24],
-        iconAnchor: [24, 12]
-    });
-    
-    L.marker(
-        [lat, lng],
-        { icon }
-    )
-    .addTo(map)
-    .bindPopup(
-        `
-        <strong>${row.duration}</strong><br>
-        ${row.restriction_summary}<br><br>
-        <strong>Street:</strong> ${row.on_street}
-        `
-    );
-
-  })
   .catch(error => {
     console.error("CSV loading error:", error);
   });
