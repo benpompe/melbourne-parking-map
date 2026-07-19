@@ -41,14 +41,27 @@ function getMarkerColour(row) {
   return row.marker_colour || "black";
 }
 
+
 fetch("parking-zones-map-data-simple.csv")
   .then(response => response.text())
   .then(csvText => {
+
     const parsed = Papa.parse(csvText, {
       header: true,
       skipEmptyLines: true
     });
-  });
+
+    const groups = {};
+
+    parsed.data.forEach(row => {
+      // grouping logic
+    });
+
+    Object.values(groups).forEach(group => {
+      // draw lines
+    });
+
+  }); // <-- closes csvText => {
   
   const groups = {};
   
