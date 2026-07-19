@@ -11,109 +11,92 @@ fetch("data/parking-zones-map-data-simple.csv")
     console.log(parsed.data.length);
     console.log(parsed.data[0]);
 
-
-    const groups = {};
-
     parsed.data.forEach(row => {
-
-      const street = row.on_street || "";
-      const streetFrom = row.street_from || "";
-      const streetTo = row.street_to || "";
-      const restriction = row.restriction_code || "";
-
-      const lat = parseFloat(row.latitude);
-      const lng = parseFloat(row.longitude);
-
-      if (isNaN(lat) || isNaN(lng)) return;
-
-      const groupKey =
-        street +
-        "|" +
-        streetFrom +
-        "|" +
-        streetTo +
-        "|" +
-        restriction;
-
-      if (!groups[groupKey]) {
-        groups[groupKey] = {
-          points: [],
-          colour: row.marker_colour || "grey",
-          duration: row.duration,
-          restriction_summary: row.restriction_summary,
-          street: street,
-          street_from: streetFrom,
-          street_to: streetTo,
-          parking_zone: row.parking_zone
-        };
-      }
-
-      groups[groupKey].points.push([lat, lng]);
-
+    
+        const lat = parseFloat(row.latitude);
+        const lng = parseFloat(row.longitude);
+    
+        if (isNaN(lat) || isNaN(lng)) {
+            return;
+        }
+    
+        const markerClass =
+            getMarkerClass(row.restriction_code);
+    
+        const icon = L.divIcon({
+            className: "parking-marker",
+            html: `
+                <div class="parking-pill ${markerClass}">
+                    ${row.duration}
+                </div>
+            `,
+            iconSize: [48, 24],
+            iconAnchor: [24, 12]
+        });
+    
+        L.marker(
+            [lat, lng],
+            { icon }
+        )
+        .addTo(window.map)
+        .bindPopup(
+            `
+            <strong>${row.duration}</strong><br>
+            ${row.restriction_summary}<br><br>
+            <strong>Street:</strong> ${row.on_street}
+            `
+        );
+    
     });
 
-    console.log("Groups:", Object.keys(groups).length);
+    function getMarkerClass(restriction) {
+    
+        const code = (restriction || "").toUpperCase();
+    
+        if (code.includes("1P")) return "marker-1p";
+        if (code.includes("2P")) return "marker-2p";
+        if (code.includes("3P")) return "marker-3p";
+        if (code.includes("4P")) return "marker-4p";
+    
+        if (code.includes("LZ"))
+            return "marker-loading";
+    
+        if (code.includes("PP"))
+            return "marker-permit";
+    
+        if (code.includes("DP"))
+            return "marker-disabled";
+    
+        return "marker-default";
+    }
 
-    Object.values(groups).forEach(group => {
-
-      if (group.points.length < 2) {
-        return;
-      }
-
-      const points = group.points;
-
-      const lats = points.map(p => p[0]);
-      const lngs = points.map(p => p[1]);
-
-      const minLat = Math.min(...lats);
-      const maxLat = Math.max(...lats);
-
-      const minLng = Math.min(...lngs);
-      const maxLng = Math.max(...lngs);
-
-      const centerLat = (minLat + maxLat) / 2;
-      const centerLng = (minLng + maxLng) / 2;
-
-      const latSpread = maxLat - minLat;
-      const lngSpread = maxLng - minLng;
-
-      let linePoints;
-
-      if (lngSpread > latSpread) {
-
-        // East-west street
-        linePoints = [
-          [centerLat, minLng],
-          [centerLat, maxLng]
-        ];
-
-      } else {
-
-        // North-south street
-        linePoints = [
-          [minLat, centerLng],
-          [maxLat, centerLng]
-        ];
-
-      }
-
-      L.polyline(linePoints, {
-        color: group.colour,
-        weight: 10,
-        opacity: 0.65,
-        lineCap: 'round',
-        lineJoin: 'round'
-      })
-      .addTo(map)
-      .bindPopup(
-        "<strong>" + group.duration + "</strong><br>" +
-        group.restriction_summary + "<br><br>" +
-        "<strong>Street:</strong> " + group.street + "<br>" +
-        "<strong>From:</strong> " + group.street_from + "<br>" +
-        "<strong>To:</strong> " + group.street_to
-      );
-
+    
+    const markerClass =
+        getMarkerClass(row.restriction_code);
+    
+    const icon = L.divIcon({
+        className: "parking-marker",
+        html: `
+            <div class="parking-pill ${markerClass}">
+                ${row.duration}
+            </div>
+        `,
+        iconSize: [48, 24],
+        iconAnchor: [24, 12]
     });
+    
+    L.marker(
+        [lat, lng],
+        { icon }
+    )
+    .addTo(map)
+    .bindPopup(
+        `
+        <strong>${row.duration}</strong><br>
+        ${row.restriction_summary}<br><br>
+        <strong>Street:</strong> ${row.on_street}
+        `
+    );
 
   })
   .catch(error => {
