@@ -1,4 +1,4 @@
-fetch("data/parking-zones-map-data-simple.csv")
+fetch("../data/parking-zones-map-data-simple.csv")
   .then(response => response.text())
   .then(csvText => {
 
