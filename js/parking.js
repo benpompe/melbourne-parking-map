@@ -1,1 +1,116 @@
+fetch("parking-zones-map-data-simple.csv")
+  .then(response => response.text())
+  .then(csvText => {
 
+    const parsed = Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true
+    });
+
+    const groups = {};
+
+    parsed.data.forEach(row => {
+
+      const street = row.on_street || "";
+      const streetFrom = row.street_from || "";
+      const streetTo = row.street_to || "";
+      const restriction = row.restriction_code || "";
+
+      const lat = parseFloat(row.latitude);
+      const lng = parseFloat(row.longitude);
+
+      if (isNaN(lat) || isNaN(lng)) return;
+
+      const groupKey =
+        street +
+        "|" +
+        streetFrom +
+        "|" +
+        streetTo +
+        "|" +
+        restriction;
+
+      if (!groups[groupKey]) {
+        groups[groupKey] = {
+          points: [],
+          colour: row.marker_colour || "grey",
+          duration: row.duration,
+          restriction_summary: row.restriction_summary,
+          street: street,
+          street_from: streetFrom,
+          street_to: streetTo,
+          parking_zone: row.parking_zone
+        };
+      }
+
+      groups[groupKey].points.push([lat, lng]);
+
+    });
+
+    console.log("Groups:", Object.keys(groups).length);
+
+    Object.values(groups).forEach(group => {
+
+      if (group.points.length < 2) {
+        return;
+      }
+
+      const points = group.points;
+
+      const lats = points.map(p => p[0]);
+      const lngs = points.map(p => p[1]);
+
+      const minLat = Math.min(...lats);
+      const maxLat = Math.max(...lats);
+
+      const minLng = Math.min(...lngs);
+      const maxLng = Math.max(...lngs);
+
+      const centerLat = (minLat + maxLat) / 2;
+      const centerLng = (minLng + maxLng) / 2;
+
+      const latSpread = maxLat - minLat;
+      const lngSpread = maxLng - minLng;
+
+      let linePoints;
+
+      if (lngSpread > latSpread) {
+
+        // East-west street
+        linePoints = [
+          [centerLat, minLng],
+          [centerLat, maxLng]
+        ];
+
+      } else {
+
+        // North-south street
+        linePoints = [
+          [minLat, centerLng],
+          [maxLat, centerLng]
+        ];
+
+      }
+
+      L.polyline(linePoints, {
+        color: group.colour,
+        weight: 10,
+        opacity: 0.65,
+        lineCap: 'round',
+        lineJoin: 'round'
+      })
+      .addTo(map)
+      .bindPopup(
+        "<strong>" + group.duration + "</strong><br>" +
+        group.restriction_summary + "<br><br>" +
+        "<strong>Street:</strong> " + group.street + "<br>" +
+        "<strong>From:</strong> " + group.street_from + "<br>" +
+        "<strong>To:</strong> " + group.street_to
+      );
+
+    });
+
+  })
+  .catch(error => {
+    console.error("CSV loading error:", error);
+  });
