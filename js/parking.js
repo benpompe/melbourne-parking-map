@@ -7,6 +7,11 @@ fetch("data/parking-zones-map-data-simple.csv")
       skipEmptyLines: true
     });
 
+    
+    console.log(parsed.data.length);
+    console.log(parsed.data[0]);
+
+
     const groups = {};
 
     parsed.data.forEach(row => {
