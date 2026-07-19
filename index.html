@@ -24,6 +24,7 @@
 <div id="map"></div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.jsscript>"></script>
 
 <script>
 
@@ -36,9 +37,57 @@ L.tileLayer(
   }
 ).addTo(map);
 
-L.marker([-37.8136, 144.9631])
-  .addTo(map)
-  .bindPopup("Melbourne CBD");
+
+<script>
+const map = L.map('map').setView([-37.8136, 144.9631], 13);
+
+L.tileLayer(
+  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }
+).addTo(map);
+
+function getMarkerColour(row) {
+  return row.marker_colour || "black";
+}
+
+fetch("parking-zones-map-data-simple.csv")
+  .then(response => response.text())
+  .then(csvText => {
+    const parsed = Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true
+    });
+
+    parsed.data.forEach(row => {
+      const lat = parseFloat(row.latitude);
+      const lng = parseFloat(row.longitude);
+
+      if (!lat || !lng) return;
+
+      const colour = getMarkerColour(row);
+
+      L.circleMarker([lat, lng], {
+        radius: 5,
+        color: colour,
+        fillColor: colour,
+        fillOpacity: 0.75,
+        weight: 1
+      })
+      .addTo(map)
+      .bindPopup(`
+        <strong>${row.duration}</strong><br>
+        ${row.restriction_summary}<br><br>
+        <strong>Street:</strong> ${row.on_street || "Unknown"}<br>
+        <strong>From:</strong> ${row.street_from || ""}<br>
+        <strong>To:</strong> ${row.street_to || ""}<br>
+        <strong>Zone:</strong> ${row.parking_zone}
+      `);
+    });
+  });
+</script>
 
 </script>
 
