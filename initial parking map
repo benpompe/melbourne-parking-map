@@ -1,0 +1,11 @@
+git init
+
+git add .
+
+git commit -m "Initial parking map"
+
+git branch -M main
+
+git remote add origin https://github.com/benpompe/melbourne-parking-map.git
+
+git push -u origin main
