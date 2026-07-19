@@ -29,11 +29,11 @@
 <script>
 const map = L.map('map').setView([-37.8136, 144.9631], 13);
 
+
 L.tileLayer(
-  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
   {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap & CARTO'
   }
 ).addTo(map);
 
@@ -48,25 +48,63 @@ fetch("parking-zones-map-data-simple.csv")
       header: true,
       skipEmptyLines: true
     });
-
-    parsed.data.forEach(row => {
-      const lat = parseFloat(row.latitude);
-      const lng = parseFloat(row.longitude);
-
-      if (isNaN(lat) || isNaN(lng)) return;
-
-      L.circleMarker([lat, lng], {
-        radius: 4,
-        color: row.marker_colour || "black",
-        fillColor: row.marker_colour || "black",
-        fillOpacity: 0.8
-      })
-      .addTo(map)
-      .bindPopup(
-        "<strong>" + row.duration + "</strong><br>" +
-        row.restriction_summary
-      );
-    });
+    
+      const zones = {};
+      
+      // Group records by parking zone
+      parsed.data.forEach(row => {
+      
+          const zone = row.parking_zone;
+      
+          if (!zone) return;
+      
+          const lat = parseFloat(row.latitude);
+          const lng = parseFloat(row.longitude);
+      
+          if (isNaN(lat) || isNaN(lng)) return;
+      
+          if (!zones[zone]) {
+              zones[zone] = {
+                  points: [],
+                  colour: row.marker_colour,
+                  duration: row.duration,
+                  street: row.on_street,
+                  restriction: row.restriction_summary
+              };
+          }
+      
+          zones[zone].points.push([lat, lng]);
+      });
+          
+      Object.values(zones).forEach(zone => {
+      
+          const lats = zone.points.map(p => p[0]);
+          const lngs = zone.points.map(p => p[1]);
+      
+          const minLat = Math.min(...lats);
+          const maxLat = Math.max(...lats);
+          const minLng = Math.min(...lngs);
+          const maxLng = Math.max(...lngs);
+      
+          const bounds = [
+              [minLat, minLng],
+              [maxLat, maxLng]
+          ];
+      
+          L.rectangle(bounds, {
+              color: zone.colour,
+              fillColor: zone.colour,
+              fillOpacity: 0.4,
+              weight: 1
+          })
+          .addTo(map)
+          .bindPopup(`
+              <strong>${zone.duration}</strong><br>
+              ${zone.restriction}<br><br>
+              ${zone.street}
+          `);
+      
+      });
   });
 </script>
 </body>
