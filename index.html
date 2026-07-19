@@ -48,64 +48,124 @@ fetch("parking-zones-map-data-simple.csv")
       header: true,
       skipEmptyLines: true
     });
-    
-      const zones = {};
-      
-      // Group records by parking zone
-      parsed.data.forEach(row => {
-      
-          const zone = row.parking_zone;
-      
-          if (!zone) return;
-      
-          const lat = parseFloat(row.latitude);
-          const lng = parseFloat(row.longitude);
-      
-          if (isNaN(lat) || isNaN(lng)) return;
-      
-          if (!zones[zone]) {
-              zones[zone] = {
-                  points: [],
-                  colour: row.marker_colour,
-                  duration: row.duration,
-                  street: row.on_street,
-                  restriction: row.restriction_summary
-              };
-          }
-      
-          zones[zone].points.push([lat, lng]);
-      });
-          
-      Object.values(zones).forEach(zone => {
-      
-          const lats = zone.points.map(p => p[0]);
-          const lngs = zone.points.map(p => p[1]);
-      
-          const minLat = Math.min(...lats);
-          const maxLat = Math.max(...lats);
-          const minLng = Math.min(...lngs);
-          const maxLng = Math.max(...lngs);
-      
-          const bounds = [
-              [minLat, minLng],
-              [maxLat, maxLng]
-          ];
-      
-          L.rectangle(bounds, {
-              color: zone.colour,
-              fillColor: zone.colour,
-              fillOpacity: 0.4,
-              weight: 1
-          })
-          .addTo(map)
-          .bindPopup(`
-              <strong>${zone.duration}</strong><br>
-              ${zone.restriction}<br><br>
-              ${zone.street}
-          `);
-      
-      });
   });
+  
+  const groups = {};
+  
+  // Group by both parking zone and restriction,
+  // so different rules in the same zone do not overwrite each other.
+  parsed.data.forEach(row => {
+    const groupKey = [
+      zone,
+      restriction
+    ].join("|")
+
+  
+    if (!zone || !restriction) return;
+  
+    const lat = parseFloat(row.latitude);
+    const lng = parseFloat(row.longitude);
+  
+    if (isNaN(lat) || isNaN(lng)) return;
+  
+    const groupKey = [
+      zone,
+      restriction,
+      days,
+      start,
+      finish
+    ].join("|");
+  
+    if (!groups[groupKey]) {
+      groups[groupKey] = {
+        points: [],
+        colour: row.marker_colour || "grey",
+        duration: row.duration,
+        restriction_code: row.restriction_code,
+        restriction_summary: row.restriction_summary,
+        street: row.on_street,
+        street_from: row.street_from,
+        street_to: row.street_to,
+        parking_zone: row.parking_zone
+      };
+    }
+  
+    groups[groupKey].points.push([lat, lng]);
+  });
+  
+      
+  function sortPointsAlongStreet(points) {
+    if (points.length <= 2) return points;
+  
+    const lats = points.map(p => p[0]);
+    const lngs = points.map(p => p[1]);
+  
+    const latSpread = Math.max(...lats) - Math.min(...lats);
+    const lngSpread = Math.max(...lngs) - Math.min(...lngs);
+  
+    // If the points spread more east-west, sort by longitude.
+    // If they spread more north-south, sort by latitude.
+    if (lngSpread > latSpread) {
+      return points.sort((a, b) => a[1] - b[1]);
+    } else {
+      return points.sort((a, b) => a[0] - b[0]);
+    }
+  }
+  
+  Object.values(groups).forEach(group => {
+    let points = group.points;
+  
+    // Remove duplicate coordinate points.
+    const seen = new Set();
+    points = points.filter(point => {
+      const key = point[0] + "," + point[1];
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  
+    // If there is only one point, draw a small circle instead.
+    if (points.length === 1) {
+      L.circleMarker(points[0], {
+        radius: 5,
+        color: group.colour,
+        fillColor: group.colour,
+        fillOpacity: 0.8,
+        weight: 1
+      })
+      .addTo(map)
+      .bindPopup(`
+        <strong>${group.duration}</strong><br>
+        ${group.restriction_summary}<br><br>
+        <strong>Street:</strong> ${group.street || "Unknown"}<br>
+        <strong>From:</strong> ${group.street_from || ""}<br>
+        <strong>To:</strong> ${group.street_to || ""}<br>
+        <strong>Zone:</strong> ${group.parking_zone}
+      `);
+  
+      return;
+    }
+  
+    points = sortPointsAlongStreet(points);
+  
+    L.polyline(points, {
+      color: group.colour,
+      weight: 8,
+      opacity: 0.75,
+      lineCap: "round",
+      lineJoin: "round"
+    })
+    .addTo(map)
+    .bindPopup(`
+      <strong>${group.duration}</strong><br>
+      ${group.restriction_summary}<br><br>
+      <strong>Street:</strong> ${group.street || "Unknown"}<br>
+      <strong>From:</strong> ${group.street_from || ""}<br>
+      <strong>To:</strong> ${group.street_to || ""}<br>
+      <strong>Zone:</strong> ${group.parking_zone}
+    `);
+  });
+     
 </script>
 </body>
 </html>
