@@ -2,22 +2,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
+<meta charset="utf-8">
 
-  <title>Melbourne Free Parking Map</title>
+<title>Melbourne Free Parking Map</title>
 
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
 
-  <style>
-    html, body, #map {
-      height: 100%;
-      margin: 0;
-      background: #000;
-    }
-  </style>
+<style>
+html, body, #map {
+  height: 100%;
+  margin: 0;
+  background: #000;
+}
+</style>
 </head>
 
 <body>
@@ -28,7 +28,8 @@
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
 
 <script>
-const map = L.map('map').setView([-37.8136, 144.9631], 13);
+
+const map = L.map('map').setView([-37.8136, 144.9631], 14);
 
 L.tileLayer(
   'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
@@ -37,22 +38,6 @@ L.tileLayer(
     maxZoom: 20
   }
 ).addTo(map);
-
-function sortPointsAlongStreet(points) {
-  if (points.length <= 2) return points;
-
-  const lats = points.map(p => p[0]);
-  const lngs = points.map(p => p[1]);
-
-  const latSpread = Math.max(...lats) - Math.min(...lats);
-  const lngSpread = Math.max(...lngs) - Math.min(...lngs);
-
-  if (lngSpread > latSpread) {
-    return points.sort((a, b) => a[1] - b[1]);
-  } else {
-    return points.sort((a, b) => a[0] - b[0]);
-  }
-}
 
 fetch("parking-zones-map-data-simple.csv")
   .then(response => response.text())
@@ -66,93 +51,111 @@ fetch("parking-zones-map-data-simple.csv")
     const groups = {};
 
     parsed.data.forEach(row => {
-      const zone = row.parking_zone;
-      const restriction = row.restriction_code;
 
-      if (!zone || !restriction) return;
+      const street = row.on_street || "";
+      const streetFrom = row.street_from || "";
+      const streetTo = row.street_to || "";
+      const restriction = row.restriction_code || "";
 
       const lat = parseFloat(row.latitude);
       const lng = parseFloat(row.longitude);
 
       if (isNaN(lat) || isNaN(lng)) return;
 
-      const groupKey = zone + "|" + restriction;
+      const groupKey =
+        street +
+        "|" +
+        streetFrom +
+        "|" +
+        streetTo +
+        "|" +
+        restriction;
 
       if (!groups[groupKey]) {
         groups[groupKey] = {
           points: [],
           colour: row.marker_colour || "grey",
           duration: row.duration,
-          restriction_code: row.restriction_code,
           restriction_summary: row.restriction_summary,
-          street: row.on_street,
-          street_from: row.street_from,
-          street_to: row.street_to,
+          street: street,
+          street_from: streetFrom,
+          street_to: streetTo,
           parking_zone: row.parking_zone
         };
       }
 
       groups[groupKey].points.push([lat, lng]);
+
     });
 
     console.log("Groups:", Object.keys(groups).length);
 
     Object.values(groups).forEach(group => {
-      let points = group.points;
 
-      const seen = new Set();
-      points = points.filter(point => {
-        const key = point[0] + "," + point[1];
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-
-      if (points.length === 1) {
-        L.circleMarker(points[0], {
-          radius: 4,
-          color: group.colour,
-          fillColor: group.colour,
-          fillOpacity: 0.8,
-          weight: 1
-        })
-        .addTo(map)
-        .bindPopup(
-          "<strong>" + group.duration + "</strong><br>" +
-          group.restriction_summary + "<br><br>" +
-          "<strong>Street:</strong> " + (group.street || "Unknown") + "<br>" +
-          "<strong>From:</strong> " + (group.street_from || "") + "<br>" +
-          "<strong>To:</strong> " + (group.street_to || "") + "<br>" +
-          "<strong>Zone:</strong> " + group.parking_zone
-        );
-
+      if (group.points.length < 2) {
         return;
       }
 
-      points = sortPointsAlongStreet(points);
+      const points = group.points;
 
-      L.polyline(points, {
+      const lats = points.map(p => p[0]);
+      const lngs = points.map(p => p[1]);
+
+      const minLat = Math.min(...lats);
+      const maxLat = Math.max(...lats);
+
+      const minLng = Math.min(...lngs);
+      const maxLng = Math.max(...lngs);
+
+      const centerLat = (minLat + maxLat) / 2;
+      const centerLng = (minLng + maxLng) / 2;
+
+      const latSpread = maxLat - minLat;
+      const lngSpread = maxLng - minLng;
+
+      let linePoints;
+
+      if (lngSpread > latSpread) {
+
+        // East-west street
+        linePoints = [
+          [centerLat, minLng],
+          [centerLat, maxLng]
+        ];
+
+      } else {
+
+        // North-south street
+        linePoints = [
+          [minLat, centerLng],
+          [maxLat, centerLng]
+        ];
+
+      }
+
+      L.polyline(linePoints, {
         color: group.colour,
-        weight: 7,
-        opacity: 0.7,
-        lineCap: "round",
-        lineJoin: "round"
+        weight: 10,
+        opacity: 0.65,
+        lineCap: 'round',
+        lineJoin: 'round'
       })
       .addTo(map)
       .bindPopup(
         "<strong>" + group.duration + "</strong><br>" +
         group.restriction_summary + "<br><br>" +
-        "<strong>Street:</strong> " + (group.street || "Unknown") + "<br>" +
-        "<strong>From:</strong> " + (group.street_from || "") + "<br>" +
-        "<strong>To:</strong> " + (group.street_to || "") + "<br>" +
-        "<strong>Zone:</strong> " + group.parking_zone
+        "<strong>Street:</strong> " + group.street + "<br>" +
+        "<strong>From:</strong> " + group.street_from + "<br>" +
+        "<strong>To:</strong> " + group.street_to
       );
+
     });
 
   })
   .catch(error => {
     console.error("CSV loading error:", error);
   });
+
 </script>
 
 </body>
