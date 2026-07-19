@@ -2,37 +2,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Melbourne Free Parking Map</title>
+  <meta charset="utf-8">
 
-    <link rel=pkg.com/leaflet@1.9.4/dist/leaflet.css
+  <title>Melbourne Free Parking Map</title>
 
-    <style>
-        html, body, #map {
-            height: 100%;
-            margin: 0;
-        }
-    </style>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+    }
+  </style>
 </head>
+
 <body>
 
 <div id="map"></div>
 
-https://unpkg.com/leaflet@1.9.4/dist/leaflet.jsscript>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
 const map = L.map('map').setView([-37.8136, 144.9631], 13);
 
 L.tileLayer(
-    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    {
-        maxZoom: 19
-    }
+  'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    maxZoom: 19
+  }
 ).addTo(map);
 
 L.marker([-37.8136, 144.9631])
- .addTo(map)
- .bindPopup("Melbourne CBD");
+  .addTo(map)
+  .bindPopup("Melbourne CBD");
 
 </script>
 
