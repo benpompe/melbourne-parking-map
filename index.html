@@ -68,14 +68,6 @@ fetch("parking-zones-map-data-simple.csv")
   
     if (isNaN(lat) || isNaN(lng)) return;
   
-    const groupKey = [
-      zone,
-      restriction,
-      days,
-      start,
-      finish
-    ].join("|");
-  
     if (!groups[groupKey]) {
       groups[groupKey] = {
         points: [],
