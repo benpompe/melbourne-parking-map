@@ -68,7 +68,7 @@ fetch("data/parking-zones-map-data-simple.csv")
             return "marker-disabled";
     
         return "marker-default";
-    }
+    });
 
   .catch(error => {
     console.error("CSV loading error:", error);
