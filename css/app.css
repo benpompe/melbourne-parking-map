@@ -15,6 +15,54 @@ body {
 /* Icons */
 .parking-marker {
     color: white;
+}
+
+/* =========================
+   Parking Pills - Background Colors
+========================= */
+
+.parking-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 12px;
+    color: white;
+}
+
+.marker-1p {
+    background-color: #3b82f6; /* Blue */
+}
+
+.marker-2p {
+    background-color: #8b5cf6; /* Purple */
+}
+
+.marker-3p {
+    background-color: #ec4899; /* Pink */
+}
+
+.marker-4p {
+    background-color: #f97316; /* Orange */
+}
+
+.marker-loading {
+    background-color: #6b7280; /* Gray */
+}
+
+.marker-permit {
+    background-color: #10b981; /* Green */
+}
+
+.marker-disabled {
+    background-color: #ef4444; /* Red */
+}
+
+.marker-default {
+    background-color: #64748b; /* Slate */
+}
 
 /* =========================
    Bottom Panel
