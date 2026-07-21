@@ -96,14 +96,15 @@ function getMarkerClass(restriction) {
 
   const code = (restriction || "").toUpperCase();
 
-  if (code.includes("LZ")) return "marker-loading";
-  if (code.includes("PP")) return "marker-permit";
-  if (code.includes("DP")) return "marker-disabled";
+  // Use exact string matching to avoid false positives
+  if (code === "LZ30" || code === "LZ") return "marker-loading";
+  if (code === "PP") return "marker-permit";
+  if (code === "DP") return "marker-disabled";
 
-  if (code.includes("1P")) return "marker-1p";
-  if (code.includes("2P")) return "marker-2p";
-  if (code.includes("3P")) return "marker-3p";
-  if (code.includes("4P")) return "marker-4p";
+  if (code === "1P") return "marker-1p";
+  if (code === "2P") return "marker-2p";
+  if (code === "3P") return "marker-3p";
+  if (code === "4P") return "marker-4p";
 
   return "marker-default";
 }
