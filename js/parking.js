@@ -78,7 +78,7 @@ fetch("data/parking-zones-map-data-simple.csv")
       .bindPopup(
         `
         <strong>${group.duration}</strong><br>
-        ${group.restriction_summary}<br><br>
+        ${group.parking_zone}<br><br>
         <strong>Street:</strong> ${group.on_street}<br>
         <strong>From:</strong> ${group.street_from}<br>
         <strong>To:</strong> ${group.street_to}
