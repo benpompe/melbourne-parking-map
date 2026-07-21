@@ -21,6 +21,11 @@ fetch("data/parking-zones-map-data-simple.csv")
         return;
       }
 
+      // Skip loading zone entries - they shouldn't be primary markers
+      if (row.restriction_code && row.restriction_code.toUpperCase().includes("LZ")) {
+        return;
+      }
+
       const zone = row.parking_zone || "unknown";
       const restriction = row.restriction_code || "unknown";
 
@@ -78,7 +83,7 @@ fetch("data/parking-zones-map-data-simple.csv")
       .bindPopup(
         `
         <strong>${group.duration}</strong><br>
-        ${group.parking_zone}<br><br>
+        ${group.restriction_summary}<br><br>
         <strong>Street:</strong> ${group.on_street}<br>
         <strong>From:</strong> ${group.street_from}<br>
         <strong>To:</strong> ${group.street_to}
