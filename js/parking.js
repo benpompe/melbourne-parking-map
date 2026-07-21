@@ -94,17 +94,39 @@ fetch("data/parking-zones-map-data-simple.csv")
 
 function getMarkerClass(restriction) {
 
-  const code = (restriction || "").toUpperCase();
+  const code = (restriction || "").toUpperCase().trim();
 
-  // Use exact string matching to avoid false positives
-  if (code === "LZ30" || code === "LZ") return "marker-loading";
-  if (code === "PP") return "marker-permit";
-  if (code === "DP") return "marker-disabled";
+  // Check for loading zone (exact match)
+  if (code === "LZ30" || code === "LZ") {
+    return "marker-loading";
+  }
 
-  if (code === "1P") return "marker-1p";
-  if (code === "2P") return "marker-2p";
-  if (code === "3P") return "marker-3p";
-  if (code === "4P") return "marker-4p";
+  // Check for special parking types (exact match)
+  if (code === "PP") {
+    return "marker-permit";
+  }
+
+  if (code === "DP") {
+    return "marker-disabled";
+  }
+
+  // Check for duration-based parking (extract the number: 1P, 2P, 3P, 4P)
+  // This handles both "2P" and "MP2P" formats
+  if (code.includes("1P")) {
+    return "marker-1p";
+  }
+
+  if (code.includes("2P")) {
+    return "marker-2p";
+  }
+
+  if (code.includes("3P")) {
+    return "marker-3p";
+  }
+
+  if (code.includes("4P")) {
+    return "marker-4p";
+  }
 
   return "marker-default";
 }
