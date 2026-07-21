@@ -12,7 +12,9 @@ body {
    z-index: 1;
 }
 
-
+/* Icons */
+.parking-marker {
+    color: white;
 
 /* =========================
    Bottom Panel
