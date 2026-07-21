@@ -21,8 +21,9 @@ fetch("data/parking-zones-map-data-simple.csv")
         return;
       }
 
-      // Skip loading zone entries - they shouldn't be primary markers
-      if (row.restriction_code && row.restriction_code.toUpperCase().includes("LZ")) {
+      // Skip loading zones completely
+      const restrictionCode = (row.restriction_code || "").toUpperCase();
+      if (restrictionCode === "LZ30" || restrictionCode === "LZ") {
         return;
       }
 
@@ -100,11 +101,6 @@ fetch("data/parking-zones-map-data-simple.csv")
 function getMarkerClass(restriction) {
 
   const code = (restriction || "").toUpperCase().trim();
-
-  // Check for loading zone (exact match)
-  if (code === "LZ30" || code === "LZ") {
-    return "marker-loading";
-  }
 
   // Check for special parking types (exact match)
   if (code === "PP") {
