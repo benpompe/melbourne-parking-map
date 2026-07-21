@@ -18,7 +18,7 @@ body {
 }
 
 /* =========================
-   Parking Pills - Background Colors
+   Parking Pills - Background Colors (Traffic Light Scheme)
 ========================= */
 
 .parking-pill {
@@ -33,35 +33,35 @@ body {
 }
 
 .marker-1p {
-    background-color: #3b82f6; /* Blue */
+    background-color: #dc2626; /* Red - 1 Hour */
 }
 
 .marker-2p {
-    background-color: #8b5cf6; /* Purple */
+    background-color: #ea580c; /* Orange - 2 Hours */
 }
 
 .marker-3p {
-    background-color: #ec4899; /* Pink */
+    background-color: #eab308; /* Yellow - 3 Hours */
 }
 
 .marker-4p {
-    background-color: #f97316; /* Orange */
+    background-color: #16a34a; /* Green - 4 Hours */
 }
 
 .marker-loading {
-    background-color: #6b7280; /* Gray */
+    background-color: #6b7280; /* Gray - Loading Zone */
 }
 
 .marker-permit {
-    background-color: #10b981; /* Green */
+    background-color: #2563eb; /* Blue - Permit */
 }
 
 .marker-disabled {
-    background-color: #ef4444; /* Red */
+    background-color: #7c3aed; /* Purple - Disabled */
 }
 
 .marker-default {
-    background-color: #64748b; /* Slate */
+    background-color: #64748b; /* Slate - Default */
 }
 
 /* =========================
