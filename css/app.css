@@ -12,6 +12,35 @@ body {
    z-index: 1;
 }
 
+/* Locate Button */
+#locate-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+#locate-btn:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transform: scale(1.05);
+}
+
+#locate-btn:active {
+    transform: scale(0.95);
+}
+
 /* Icons */
 .parking-marker {
     color: white;
@@ -46,10 +75,6 @@ body {
 
 .marker-4p {
     background-color: #16a34a; /* Green - 4 Hours */
-}
-
-.marker-loading {
-    background-color: #6b7280; /* Gray - Loading Zone */
 }
 
 .marker-permit {
@@ -132,6 +157,8 @@ body {
     flex: 1;
 
     max-width: 800px;
+
+    position: relative;
 }
 
 #search-input {
@@ -167,6 +194,40 @@ body {
     border-color: #3b82f6;
 
     background: rgba(255,255,255,0.08);
+}
+
+#search-results {
+    position: absolute;
+    top: -200px;
+    left: 0;
+    right: 0;
+    background: rgba(15,15,15,0.98);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 12px;
+    max-height: 180px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+#search-results.active {
+    display: block;
+}
+
+.search-result {
+    padding: 12px 20px;
+    color: white;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    transition: background 0.2s;
+}
+
+.search-result:hover {
+    background: rgba(255,255,255,0.08);
+}
+
+.search-result:last-child {
+    border-bottom: none;
 }
 
 
@@ -205,5 +266,14 @@ body {
     #search-input {
 
         height: 48px;
+    }
+
+    #search-results {
+        position: fixed;
+        top: auto;
+        bottom: calc(32vh + 16px);
+        left: 16px;
+        right: 16px;
+        max-height: 200px;
     }
 }
