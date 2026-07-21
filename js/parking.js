@@ -10,6 +10,11 @@ fetch("data/parking-zones-map-data-simple.csv")
 
     console.log("Rows:", parsed.data.length);
 
+    // Pass all data to search function
+    if (typeof setParkingData !== 'undefined') {
+      setParkingData(parsed.data);
+    }
+
     const groups = {};
 
     parsed.data.forEach(row => {
